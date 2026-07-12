@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "576753241084",
+    "project_id": "foodtap-upt-2026",
+    "storage_bucket": "foodtap-upt-2026.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:576753241084:android:36430fc3eefd700daa0079",
+        "android_client_info": {
+          "package_name": "com.example.food_tap_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDWas5GrlY3HXC1IKIBEEsaGf90O7mlvx0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
