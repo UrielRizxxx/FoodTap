@@ -2,83 +2,77 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/services/auth_service.dart';
-import '../../../core/widgets/custom_text_field.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../widgets/auth_header.dart';
 import '../widgets/auth_logo.dart';
 
-class ForgotPasswordScreen extends StatefulWidget {
-  const ForgotPasswordScreen({super.key});
+class VerifyEmailScreen extends StatefulWidget {
+  const VerifyEmailScreen({super.key});
 
   @override
-  State<ForgotPasswordScreen> createState() =>
-      _ForgotPasswordScreenState();
+  State<VerifyEmailScreen> createState() => _VerifyEmailScreenState();
 }
 
-class _ForgotPasswordScreenState
-    extends State<ForgotPasswordScreen> {
-  final emailController = TextEditingController();
-
+class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
   bool _isLoading = false;
 
-  @override
-  void dispose() {
-    emailController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _resetPassword() async {
-    final email = emailController.text.trim();
-
-    if (email.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Ingresa tu correo electrónico.',
-          ),
-        ),
-      );
-      return;
-    }
-
+  Future<void> _checkVerification() async {
     setState(() {
       _isLoading = true;
     });
 
-    try {
-      await AuthService.instance.resetPassword(
-        email: email,
-      );
+    await AuthService.instance.reloadUser();
 
-      if (!mounted) return;
+    if (!mounted) return;
 
+    if (AuthService.instance.isEmailVerified) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
-            'Se envió un enlace para restablecer tu contraseña.',
+            '¡Correo verificado correctamente!',
           ),
         ),
       );
 
       context.go('/login');
-    } catch (e) {
-      debugPrint('LOGIN ERROR: $e');
-
-      if (!mounted) return;
-
+    } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text(
-            e.toString(),
+            'Tu correo aún no ha sido verificado.',
           ),
         ),
       );
     }
 
-    if (mounted) {
-      setState(() {
-        _isLoading = false;
-      });
+    setState(() {
+      _isLoading = false;
+    });
+  }
+
+  Future<void> _resendEmail() async {
+    try {
+      await AuthService.instance.sendEmailVerification();
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Se envió nuevamente el correo de verificación.',
+          ),
+        ),
+      );
+    } catch (_) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'No fue posible reenviar el correo.',
+          ),
+        ),
+      );
     }
   }
 
@@ -90,49 +84,55 @@ class _ForgotPasswordScreenState
           physics: const BouncingScrollPhysics(),
           padding: const EdgeInsets.fromLTRB(
             26,
-            4,
+            20,
             26,
             20,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const SizedBox(height: 4),
-
               const Center(
                 child: AuthLogo(
-                  width: 260,
+                  width: 220,
                 ),
               ),
 
-              const SizedBox(height: 8),
+              const SizedBox(height: 20),
 
               const AuthHeader(
-                title: 'Recuperar contraseña',
+                title: 'Verifica tu correo',
                 subtitle:
-                    'Ingresa tu correo para enviarte un enlace de recuperación.',
+                    'Te hemos enviado un enlace de verificación a tu correo electrónico.',
               ),
 
-              const SizedBox(height: 24),
+              const SizedBox(height: 40),
 
-              CustomTextField(
-                controller: emailController,
-                label: 'Correo electrónico',
-                keyboardType: TextInputType.emailAddress,
-                icon: Icons.email_outlined,
+              const Icon(
+                Icons.mark_email_read_outlined,
+                size: 100,
+                color: Colors.green,
               ),
 
-              const SizedBox(height: 24),
+              const SizedBox(height: 30),
 
               PrimaryButton(
-                text: 'Enviar enlace',
+                text: 'Ya verifiqué mi cuenta',
                 isLoading: _isLoading,
                 onPressed: () async {
-                  await _resetPassword();
+                  await _checkVerification();
                 },
               ),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: 16),
+
+              OutlinedButton(
+                onPressed: _resendEmail,
+                child: const Text(
+                  'Reenviar correo',
+                ),
+              ),
+
+              const SizedBox(height: 24),
 
               TextButton(
                 onPressed: () {

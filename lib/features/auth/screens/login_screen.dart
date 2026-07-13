@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+//import 'package:flutter_svg/flutter_svg.dart';
+import 'package:go_router/go_router.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
+import '../../../core/services/auth_service.dart';
 import '../../../core/widgets/custom_text_field.dart';
 import '../../../core/widgets/primary_button.dart';
-import '../widgets/auth_divider.dart';
+//import '../widgets/auth_divider.dart';
 import '../widgets/auth_header.dart';
 import '../widgets/auth_logo.dart';
-import '../widgets/social_login_button.dart';
+//import '../widgets/social_login_button.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -19,12 +22,97 @@ class _LoginScreenState extends State<LoginScreen> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
+  bool _obscurePassword = true;
+  bool _isLoading = false;
+
   @override
   void dispose() {
     emailController.dispose();
     passwordController.dispose();
     super.dispose();
   }
+
+  Future<void> _login() async {
+  final email = emailController.text.trim();
+  final password = passwordController.text.trim();
+
+  if (email.isEmpty || password.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+          'Completa todos los campos.',
+        ),
+      ),
+    );
+    return;
+  }
+
+  setState(() {
+    _isLoading = true;
+  });
+
+  try {
+    await AuthService.instance.signIn(
+      email: email,
+      password: password,
+    );
+
+    if (!mounted) return;
+
+    context.go('/home');
+  } on FirebaseAuthException catch (e) {
+    String message = 'Ha ocurrido un error.';
+
+    switch (e.code) {
+      case 'invalid-email':
+        message = 'El correo electrónico no es válido.';
+        break;
+
+      case 'user-not-found':
+        message = 'No existe una cuenta con ese correo.';
+        break;
+
+      case 'wrong-password':
+      case 'invalid-credential':
+        message = 'Correo o contraseña incorrectos.';
+        break;
+
+      case 'too-many-requests':
+        message = 'Demasiados intentos. Inténtalo más tarde.';
+        break;
+
+      case 'network-request-failed':
+        message = 'Sin conexión a Internet.';
+        break;
+    }
+
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+      ),
+    );
+  } catch (e) {
+    debugPrint('LOGIN ERROR: $e');
+
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          e.toString(),
+        ),
+      ),
+    );
+  }
+
+  if (mounted) {
+    setState(() {
+      _isLoading = false;
+    });
+  }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -70,8 +158,20 @@ class _LoginScreenState extends State<LoginScreen> {
               CustomTextField(
                 controller: passwordController,
                 label: 'Contraseña',
-                obscureText: true,
+                obscureText: _obscurePassword,
                 icon: Icons.lock_outline,
+                suffixIcon: IconButton(
+                  onPressed: () {
+                    setState(() {
+                      _obscurePassword = !_obscurePassword;
+                    });
+                  },
+                  icon: Icon(
+                    _obscurePassword
+                        ? Icons.visibility_off_outlined
+                        : Icons.visibility_outlined,
+                  ),
+                ),
               ),
 
               const SizedBox(height: 6),
@@ -79,7 +179,9 @@ class _LoginScreenState extends State<LoginScreen> {
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    context.go('/forgot-password');// TODO: Navegar a Recuperar Contraseña
+                  },
                   child: const Text(
                     '¿Olvidaste tu contraseña?',
                   ),
@@ -90,33 +192,40 @@ class _LoginScreenState extends State<LoginScreen> {
 
               PrimaryButton(
                 text: 'Iniciar sesión',
-                onPressed: () {},
+                isLoading: _isLoading,
+                onPressed: () async {
+                  await _login();
+                },
               ),
 
-              const SizedBox(height: 20),
+              //const SizedBox(height: 20),
 
-              const AuthDivider(),
+              //const AuthDivider(),
 
-              const SizedBox(height: 20),
+              //const SizedBox(height: 20),
 
-              SocialLoginButton(
-                text: 'Continuar con Google',
-                icon: SvgPicture.asset(
-                  'assets/icons/social/google.svg',
-                  width: 22,
-                  height: 22,
-                ),
-                onPressed: () {},
-              ),
+              //SocialLoginButton(
+                //text: 'Continuar con Google',
+                //icon: SvgPicture.asset(
+                  //'assets/icons/social/google.svg',
+                  //width: 22,
+                  //height: 22,
+                //),
+                //onPressed: () {
+                  // TODO: Inicio de sesión con Google
+                //},
+              //),
 
-              const SizedBox(height: 24),
+              //const SizedBox(height: 24),
 
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Text('¿No tienes cuenta?'),
                   TextButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      context.go('/register');// TODO: Navegar a Registro
+                    },
                     child: const Text('Crear cuenta'),
                   ),
                 ],
