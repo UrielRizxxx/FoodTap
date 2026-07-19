@@ -26,10 +26,37 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _isLoading = false;
 
   @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _redirectIfAuthenticated();
+    });
+  }
+
+  @override
   void dispose() {
     emailController.dispose();
     passwordController.dispose();
     super.dispose();
+  }
+
+  Future<void> _redirectIfAuthenticated() async {
+    if (!mounted || !AuthService.instance.isLoggedIn) return;
+
+    try {
+      await AuthService.instance.reloadUser();
+
+      if (!mounted) return;
+
+      if (AuthService.instance.isEmailVerified) {
+        context.go('/home');
+      } else {
+        context.go('/verify-email');
+      }
+    } catch (_) {
+      await AuthService.instance.signOut();
+    }
   }
 
   Future<void> _login() async {
@@ -59,7 +86,15 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (!mounted) return;
 
-    context.go('/home');
+    await AuthService.instance.reloadUser();
+
+    if (!mounted) return;
+
+    if (AuthService.instance.isEmailVerified) {
+      context.go('/home');
+    } else {
+      context.go('/verify-email');
+    }
   } on FirebaseAuthException catch (e) {
     String message = 'Ha ocurrido un error.';
 

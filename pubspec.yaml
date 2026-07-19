@@ -17,7 +17,6 @@ dependencies:
   firebase_core: ^4.0.0
   firebase_auth: ^6.0.1
   cloud_firestore: ^6.0.0
-  firebase_storage: ^13.0.0
 
   # Estado
   provider: ^6.1.5
@@ -34,6 +33,7 @@ dependencies:
 
   # Fechas
   intl: ^0.20.2
+  http: ^1.6.0
 
 dev_dependencies:
   flutter_test:

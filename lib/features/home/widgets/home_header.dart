@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/app_colors.dart';
 import 'notification_button.dart';
 import 'profile_avatar.dart';
 
@@ -25,33 +26,32 @@ class HomeHeader extends StatelessWidget {
           photoUrl: photoUrl,
           onTap: onProfileTap,
         ),
-
-        const SizedBox(width: 16),
-
+        const SizedBox(width: 12),
         Expanded(
           child: Column(
-            crossAxisAlignment:
-                CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 'Hola, $userName',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
                 ),
               ),
-              const SizedBox(height: 4),
-              Text(
-                '¿Qué vas a comprar hoy?',
+              const SizedBox(height: 2),
+              const Text(
+                'Que vas a comprar hoy?',
                 style: TextStyle(
-                  color: Colors.grey.shade600,
-                  fontSize: 15,
+                  color: AppColors.textPrimary,
+                  fontSize: 12,
                 ),
               ),
             ],
           ),
         ),
-
         NotificationButton(
           onPressed: onNotificationTap,
         ),

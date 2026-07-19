@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/app_colors.dart';
+
 class ProductImagePicker extends StatelessWidget {
   const ProductImagePicker({
     super.key,
@@ -17,12 +19,13 @@ class ProductImagePicker extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        height: 190,
+        height: 180,
         width: double.infinity,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(18),
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: Colors.grey.shade300,
+            color: AppColors.border,
           ),
         ),
         child: image == null
@@ -31,16 +34,23 @@ class ProductImagePicker extends StatelessWidget {
                 children: [
                   Icon(
                     Icons.photo_camera_outlined,
-                    size: 42,
+                    size: 36,
+                    color: AppColors.textSecondary,
                   ),
                   SizedBox(height: 12),
                   Text(
-                    'Agregar fotografía',
+                    'Subir imagen permitida',
+                    style: TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 12,
+                    ),
                   ),
                 ],
               )
             : ClipRRect(
-                borderRadius: BorderRadius.circular(18),
+                borderRadius: BorderRadius.all(
+                  Radius.circular(12),
+                ),
                 child: Image.file(
                   image!,
                   fit: BoxFit.cover,
